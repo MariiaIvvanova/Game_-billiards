@@ -1,86 +1,38 @@
-from copy import deepcopy
-
 import pygame
-
-W, H = 10, 20
-TILE = 30   # 40, 45
-GAME_RES = W * TILE, H * TILE
-RES = 750, 940
-FPS = 60
-
-
-def check_borders():
-    if figure[i].x < 0 or figure[i].x > W - 1:
-        return False
-    return True
+from config import GAME_RES, FPS, COLORS
+from core.game import Game
+from core.grid import Grid
+from core.renderer import Renderer
+from core.input_handler import handle_input
 
 
-pygame.init()
-game_sc = pygame.display.set_mode(GAME_RES)
-clock = pygame.time.Clock()
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode(GAME_RES)
+    clock = pygame.time.Clock()
 
-grid = [pygame.Rect(x * TILE, y * TILE, TILE, TILE) for x in range(W) for y in range(H)]
+    game = Game()
+    grid = Grid()
+    renderer = Renderer(screen)
 
-figures_pos = [[(-1, 0), (-2, 0), (0, 0), (1, 0)],
-               [(0, -1), (-1, -1), (-1, 0), (0, 0)],
-               [(-1, 0), (-1, 1), (0, 0), (0, -1)],
-               [(0, 0), (-1, 0), (0, 1), (-1, -1)],
-               [(0, 0), (0, -1), (0, 1), (-1, -1)],
-               [(0, 0), (0, -1), (0, 1), (1, -1)],
-               [(0, 0), (0, -1), (0, 1), (-1, 0)]]
+    running = True
+    while running:
+        screen.fill(pygame.Color(COLORS["background"]))
 
-figures = [[pygame.Rect(x + W // 2, y + 1, 1, 1) for x, y in fig_pos] for fig_pos in figures_pos]
-figure_rect = pygame.Rect(0, 0, TILE - 2, TILE - 2)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            handle_input(game, event)
 
-anim_count, anim_speed, anim_limit = 0, 60, 2000
+        game.update()
+        grid.draw(screen, COLORS["grid"])
+        renderer.draw_figure(game.figure, COLORS["figure"])
 
-figure = figures[0]
+        pygame.display.flip()
+        clock.tick(FPS)
 
-while True:
-    dx = 0
-    game_sc.fill(pygame.Color('black'))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                dx = -1
-            elif event.key == pygame.K_RIGHT:
-                dx = 1
-            elif event.key == pygame.K_DOWN:
-                anim_limit = 100
-            elif event.key == pygame.K_UP:
-                rotate = True
-    # x
-    figure_old = deepcopy(figure)
-    for i in range(4):
-        figure[i].x += dx
-        if not check_borders():
-            figure = deepcopy(figure_old)
-            break
-    # y
-    anim_count += anim_speed
-    if anim_count > anim_limit:
-        anim_count = 0
-        figure_old = deepcopy(figure)
-        for i in range(4):
-            figure[i].y += 1
-            if not check_borders():
-                figure = deepcopy(figure_old)
-                anim_limit = 2000
-                break
-
-    # draw grid
-    [pygame.draw.rect(game_sc, (40, 40, 40), i_rect, 1) for i_rect in grid]
-
-    # draw figure
-    for i in range(4):
-        figure_rect.x = figure[i].x * TILE
-        figure_rect.y = figure[i].y * TILE
-        pygame.draw.rect(game_sc, pygame.Color("white"), figure_rect)
-
-    pygame.display.flip()
-    clock.tick(FPS)
+    pygame.quit()
 
 
-
+if __name__ == "__main__":
+    main()
