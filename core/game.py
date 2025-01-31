@@ -17,6 +17,7 @@ class Game:
 
     def update(self):
         # Обновление состояния (падение фигуры).
+        score = 0 #счетчик очков
         self.anim_count += self.anim_speed
         if self.anim_count > self.anim_limit:
             self.anim_count = 0
@@ -26,3 +27,5 @@ class Game:
             if not self.check_borders():
                 self.figure.blocks = deepcopy(figure_old)
                 self.anim_limit = 2000  # Сбрасываем скорость падения
+                score += len(self.figure.blocks)  #
+
