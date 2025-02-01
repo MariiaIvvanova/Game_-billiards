@@ -1,16 +1,18 @@
 import pygame
 
 
-def handle_input(game, event):
-    # Обрабатывает клавиши.
-    if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_LEFT:
-            game.figure.move(-1, 0)
-        elif event.key == pygame.K_RIGHT:
-            game.figure.move(1, 0)
-        elif event.key == pygame.K_DOWN:
-            game.anim_limit = 100  # Ускоряем падение
-
-    elif event.type == pygame.KEYUP:
-        if event.key == pygame.K_DOWN:
-            game.anim_limit = 2000  # Возвращаем стандартную скорость
+def handle_input(events):
+    dx, rotate, drop_speed = 0, False, None
+    for event in events:
+        if event.type == pygame.QUIT:
+            return False, dx, rotate, drop_speed
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                dx = -1
+            elif event.key == pygame.K_RIGHT:
+                dx = 1
+            elif event.key == pygame.K_DOWN:
+                drop_speed = 100
+            elif event.key == pygame.K_UP:
+                rotate = True
+    return True, dx, rotate, drop_speed
