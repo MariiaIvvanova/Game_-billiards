@@ -3,3 +3,4 @@ TILE = 30   # 40, 45
 GAME_RES = W * TILE, H * TILE
 RES = 750, 940
 FPS = 60
+palette = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
