@@ -1,7 +1,7 @@
 import pygame
 
 
-def handle_input(events):
+def handle_input(events, status):
     dx, rotate, drop_speed = 0, False, None
     for event in events:
         if event.type == pygame.QUIT:
@@ -15,4 +15,6 @@ def handle_input(events):
                 drop_speed = 100
             elif event.key == pygame.K_UP:
                 rotate = True
-    return True, dx, rotate, drop_speed
+            elif event.key == pygame.K_SPACE:
+                status = "to play"
+    return True, dx, rotate, drop_speed, status
