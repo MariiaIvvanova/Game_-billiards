@@ -8,6 +8,7 @@ from core.input_handler import handle_input
 from core.game import rotate_figure, break_lines, check_borders
 
 
+# Инициализация игры
 def init_game():
     pygame.init()
     status = "menu"
@@ -19,10 +20,29 @@ def init_game():
     return screen, game_sc, clock, grid, field, status
 
 
+# Загрузка всех изображений
+def load_images():
+    menu_screen = pygame.image.load('assets/заставка1.png')
+    menu_screen = pygame.transform.scale(menu_screen, RES)
+
+    game_over_screen = pygame.image.load('assets/game_over.webp')
+    game_over_screen = pygame.transform.scale(game_over_screen, RES)
+
+    back_ground = pygame.image.load('assets/рабочий_стол_игры.jpeg')
+    back_ground = pygame.transform.scale(back_ground, RES)
+
+    bg = pygame.image.load("assets/bg.jpeg")
+    bg = pygame.transform.scale(bg, RES)
+
+    return menu_screen, game_over_screen, back_ground, bg
+
+
+# Обработка ввода
 def process_input(status):
     return handle_input(pygame.event.get(), status)
 
 
+# Обновление фигуры
 def update_figure(figure, dx, rotate, field):
     figure_old = deepcopy(figure)
     for block in figure:
@@ -34,6 +54,7 @@ def update_figure(figure, dx, rotate, field):
     return figure
 
 
+# Обновление анимации
 def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object):
     status = "to play"
     color = f_object.color
@@ -55,6 +76,7 @@ def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object
     return figure, color, field, anim_count, anim_limit, status
 
 
+# Отображение игры
 def draw_game(screen, game_sc, grid, figure, color, field, back_ground, status):
     if status == "to play":
         game_sc.blit(back_ground, (0, 0))  # Фон для игрового поля
@@ -65,24 +87,15 @@ def draw_game(screen, game_sc, grid, figure, color, field, back_ground, status):
     pygame.display.flip()
 
 
+# Главная функция игры
 def main():
     screen, game_sc, clock, grid, field, status = init_game()
     anim_count, anim_speed, anim_limit = 0, 60, 2000
     figure = deepcopy(choice(figures))
     figure = Figure(figure, choice(palette))
 
-    # Загружаем изображения
-    menu_screen = pygame.image.load('assets/заставка1.png')
-    menu_screen = pygame.transform.scale(menu_screen, RES)
-
-    game_over_screen = pygame.image.load('assets/game_over.webp')
-    game_over_screen = pygame.transform.scale(game_over_screen, RES)
-
-    back_ground = pygame.image.load('assets/рабочий_стол_игры.jpeg')
-    back_ground = pygame.transform.scale(back_ground, RES)
-
-    bg = pygame.image.load("assets/bg.jpeg")
-    bg = pygame.transform.scale(bg, RES)
+    # Загрузка изображений
+    menu_screen, game_over_screen, back_ground, bg = load_images()
 
     running = True
 
@@ -96,14 +109,9 @@ def main():
         if status == "menu":
             screen.blit(menu_screen, (0, 0))  # Показываем меню
         elif status == "to play":
-            screen.blit(bg, (0, 0))  # Основной фон
-            game_sc.blit(back_ground, (0, 0))  # Фон для игрового поля
-
             figure.figure = update_figure(figure.figure, dx, rotate, field)
             figure.figure, figure.color, field, anim_count, anim_limit, status = update_animation(figure.figure, field, anim_count, anim_speed, anim_limit, figure)
-
             draw_game(screen, game_sc, grid, figure.figure, figure.color, field, back_ground, status)  # Отрисовка сетки и фигур
-
         elif status == "game over":
             screen.blit(game_over_screen, (0, 0))
 
@@ -113,4 +121,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
