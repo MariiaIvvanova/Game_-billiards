@@ -54,8 +54,8 @@ def update_figure(figure, dx, rotate, field):
     return figure
 
 
-# Обновление анимации
 def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object, next_figure):
+    score = 0  # Локальная переменная для счёта
     status = "to play"
     color = f_object.color
     anim_count += anim_speed
@@ -69,7 +69,7 @@ def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object
                 if block.y == 0:
                     status = "game over"
                 field[block.y][block.x] = pygame.Color(f_object.color)
-            field = break_lines(field)
+            field = break_lines(field)  # Получаем новый счёт после удаления линий
 
             # Заменить текущую фигуру на следующую
             figure = deepcopy(next_figure)
@@ -91,13 +91,21 @@ def draw_game(screen, game_sc, grid, figure, color, field, back_ground, status):
     pygame.display.flip()
 
 
-# Функция для отображения следующей фигуры
-def draw_next_figure(screen, next_figure, palette):
-    next_figure_rect = pygame.Rect((W * TILE) + 50, 50, 30, 30)
+def draw_next_figure(screen, next_figure, palette, scale=1):
+    next_figure_rect = pygame.Rect((W * TILE) + 50, 50, 30 * scale, 30 * scale)
+    block_size = TILE * scale
+    for i, block in enumerate(next_figure):
+        x_offset = (block[0] * block_size) - 100
+        y_offset = (block[1] * block_size)
 
-    # Отображаем фигуру
-    for block in next_figure:
-        pygame.draw.rect(screen, pygame.Color(palette[0]), block.move(next_figure_rect.topleft))
+        block_rect = pygame.Rect(next_figure_rect.x + x_offset, next_figure_rect.y + y_offset, block_size, block_size)
+        pygame.draw.rect(screen, pygame.Color(palette[0]), block_rect)
+
+
+def draw_text(screen, text, x, y, font_size=30):
+    font = pygame.font.SysFont("Arial", font_size)
+    text_surface = font.render(text, True, pygame.Color("white"))
+    screen.blit(text_surface, (x, y))
 
 
 # Главная функция игры
@@ -110,7 +118,6 @@ def main():
 
     # Загрузка изображений
     menu_screen, game_over_screen, back_ground, bg = load_images()
-
     running = True
 
     while running:
@@ -125,7 +132,10 @@ def main():
         elif status == "to play":
             draw_next_figure(screen, next_figure, palette)
             figure.figure = update_figure(figure.figure, dx, rotate, field)
-            figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure = update_animation(figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)
+            figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure = update_animation(
+                figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)  # Передаём score обратно
+
+            # Отрисовка игры
             draw_game(screen, game_sc, grid, figure.figure, figure.color, field, back_ground, status)  # Отрисовка сетки и фигур
 
         elif status == "game over":
