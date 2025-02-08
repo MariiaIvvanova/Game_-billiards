@@ -91,13 +91,15 @@ def draw_game(screen, game_sc, grid, figure, color, field, back_ground, status):
     pygame.display.flip()
 
 
-# Функция для отображения следующей фигуры
-def draw_next_figure(screen, next_figure, palette):
-    next_figure_rect = pygame.Rect((W * TILE) + 50, 50, 30, 30)
+def draw_next_figure(screen, next_figure, palette, scale=1):
+    next_figure_rect = pygame.Rect((W * TILE) + 50, 50, 30 * scale, 30 * scale)
+    block_size = TILE * scale
+    for i, block in enumerate(next_figure):
+        x_offset = (block[0] * block_size) - 100
+        y_offset = (block[1] * block_size)
 
-    # Отображаем фигуру
-    for block in next_figure:
-        pygame.draw.rect(screen, pygame.Color(palette[0]), block.move(next_figure_rect.topleft))
+        block_rect = pygame.Rect(next_figure_rect.x + x_offset, next_figure_rect.y + y_offset, block_size, block_size)
+        pygame.draw.rect(screen, pygame.Color(palette[0]), block_rect)
 
 
 # Главная функция игры
