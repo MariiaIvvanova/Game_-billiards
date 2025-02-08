@@ -6,7 +6,7 @@ from core.tetromino import figures, Figure
 from core.renderer import draw_grid, draw_figure, draw_field
 from core.input_handler import handle_input
 from core.game import rotate_figure, break_lines, check_borders
-
+from core.score.counting_score import save_high_score, load_high_score
 
 # Инициализация игры
 def init_game():
@@ -54,8 +54,8 @@ def update_figure(figure, dx, rotate, field):
     return figure
 
 
-# Обновление анимации
 def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object, next_figure):
+    score = 0  # Локальная переменная для счёта
     status = "to play"
     color = f_object.color
     anim_count += anim_speed
@@ -69,7 +69,7 @@ def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object
                 if block.y == 0:
                     status = "game over"
                 field[block.y][block.x] = pygame.Color(f_object.color)
-            field = break_lines(field)
+            field, score = break_lines(field)  # Получаем новый счёт после удаления линий
 
             # Заменить текущую фигуру на следующую
             figure = deepcopy(next_figure)
@@ -77,7 +77,8 @@ def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object
 
             color = choice(palette)
             anim_limit = 2000
-    return figure, color, field, anim_count, anim_limit, status, next_figure
+    print(f"Score during animation update: {score}")  # Логирование для отладки
+    return figure, color, field, anim_count, anim_limit, status, next_figure, score
 
 
 # Отображение игры
@@ -102,6 +103,12 @@ def draw_next_figure(screen, next_figure, palette, scale=1):
         pygame.draw.rect(screen, pygame.Color(palette[0]), block_rect)
 
 
+def draw_text(screen, text, x, y, font_size=30):
+    font = pygame.font.SysFont("Arial", font_size)
+    text_surface = font.render(text, True, pygame.Color("white"))
+    screen.blit(text_surface, (x, y))
+
+
 # Главная функция игры
 def main():
     screen, game_sc, clock, grid, field, status = init_game()
@@ -113,6 +120,8 @@ def main():
     # Загрузка изображений
     menu_screen, game_over_screen, back_ground, bg = load_images()
 
+    score = 0  # Инициализация счёта
+    high_score = load_high_score()  # Load the high score at the start
     running = True
 
     while running:
@@ -127,11 +136,20 @@ def main():
         elif status == "to play":
             draw_next_figure(screen, next_figure, palette)
             figure.figure = update_figure(figure.figure, dx, rotate, field)
-            figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure = update_animation(figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)
+            figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure, score = update_animation(
+                figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)  # Передаём score обратно
+
+            # Отрисовка игры
             draw_game(screen, game_sc, grid, figure.figure, figure.color, field, back_ground, status)  # Отрисовка сетки и фигур
+
+            # Отображение счёта на экране
+            draw_text(screen, f"Score: {score}", 10, 10)
+            draw_text(screen, f"High Score: {high_score}", 10, 50)
 
         elif status == "game over":
             screen.blit(game_over_screen, (0, 0))
+            # Save high score if the current score is higher
+            save_high_score(score)
 
         pygame.display.flip()
         clock.tick(FPS)

@@ -3,7 +3,7 @@ from config import W, H
 
 
 def rotate_figure(figure, field):
-    """Вращение фигуры вокруг её центра."""
+    # Вращение фигуры вокруг её центра.
     center = figure[0]
     figure_old = deepcopy(figure)
     for block in figure:
@@ -17,16 +17,19 @@ def rotate_figure(figure, field):
 
 
 def break_lines(field):
-    """Удаление полностью заполненных линий."""
     line = H - 1
+    score = 0
     for row in range(H - 1, -1, -1):
-        count = sum(1 for i in range(W) if field[row][i])
+        count = sum(1 for i in range(W) if field[row][i])  # Подсчёт занятых ячеек в строке
         field[line] = field[row]
         if count < W:
             line -= 1
         else:
-            field[line] = [0] * W  # Очищаем линию
-    return field
+            field[line] = [0] * W
+            score += 1
+    print(f"Lines cleared: {score}")
+    return field, score
+
 
 
 def check_borders(figure, field, W, H):
