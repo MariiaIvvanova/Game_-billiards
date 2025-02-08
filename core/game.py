@@ -18,7 +18,6 @@ def rotate_figure(figure, field):
 
 def break_lines(field):
     line = H - 1
-    score = 0
     for row in range(H - 1, -1, -1):
         count = sum(1 for i in range(W) if field[row][i])  # Подсчёт занятых ячеек в строке
         field[line] = field[row]
@@ -26,10 +25,7 @@ def break_lines(field):
             line -= 1
         else:
             field[line] = [0] * W
-            score += 1
-    print(f"Lines cleared: {score}")
-    return field, score
-
+    return field
 
 
 def check_borders(figure, field, W, H):

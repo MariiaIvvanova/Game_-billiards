@@ -6,7 +6,7 @@ from core.tetromino import figures, Figure
 from core.renderer import draw_grid, draw_figure, draw_field
 from core.input_handler import handle_input
 from core.game import rotate_figure, break_lines, check_borders
-from core.score.counting_score import save_high_score, load_high_score
+
 
 # Инициализация игры
 def init_game():
@@ -69,7 +69,7 @@ def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object
                 if block.y == 0:
                     status = "game over"
                 field[block.y][block.x] = pygame.Color(f_object.color)
-            field, score = break_lines(field)  # Получаем новый счёт после удаления линий
+            field = break_lines(field)  # Получаем новый счёт после удаления линий
 
             # Заменить текущую фигуру на следующую
             figure = deepcopy(next_figure)
@@ -77,8 +77,7 @@ def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object
 
             color = choice(palette)
             anim_limit = 2000
-    print(f"Score during animation update: {score}")  # Логирование для отладки
-    return figure, color, field, anim_count, anim_limit, status, next_figure, score
+    return figure, color, field, anim_count, anim_limit, status, next_figure
 
 
 # Отображение игры
@@ -119,9 +118,6 @@ def main():
 
     # Загрузка изображений
     menu_screen, game_over_screen, back_ground, bg = load_images()
-
-    score = 0  # Инициализация счёта
-    high_score = load_high_score()  # Load the high score at the start
     running = True
 
     while running:
@@ -136,20 +132,14 @@ def main():
         elif status == "to play":
             draw_next_figure(screen, next_figure, palette)
             figure.figure = update_figure(figure.figure, dx, rotate, field)
-            figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure, score = update_animation(
+            figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure = update_animation(
                 figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)  # Передаём score обратно
 
             # Отрисовка игры
             draw_game(screen, game_sc, grid, figure.figure, figure.color, field, back_ground, status)  # Отрисовка сетки и фигур
 
-            # Отображение счёта на экране
-            draw_text(screen, f"Score: {score}", 10, 10)
-            draw_text(screen, f"High Score: {high_score}", 10, 50)
-
         elif status == "game over":
             screen.blit(game_over_screen, (0, 0))
-            # Save high score if the current score is higher
-            save_high_score(score)
 
         pygame.display.flip()
         clock.tick(FPS)
