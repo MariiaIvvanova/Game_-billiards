@@ -1,7 +1,7 @@
 import pygame
 from copy import deepcopy
 from random import choice
-from config import W, H, GAME_RES, RES, FPS, palette
+from config import W, H, GAME_RES, RES, FPS, palette, TILE
 from core.tetromino import figures, Figure
 from core.renderer import draw_grid, draw_figure, draw_field
 from core.input_handler import handle_input
@@ -55,7 +55,7 @@ def update_figure(figure, dx, rotate, field):
 
 
 # Обновление анимации
-def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object):
+def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object, next_figure):
     status = "to play"
     color = f_object.color
     anim_count += anim_speed
@@ -70,10 +70,14 @@ def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object
                     status = "game over"
                 field[block.y][block.x] = pygame.Color(f_object.color)
             field = break_lines(field)
-            figure = deepcopy(choice(figures))
+
+            # Заменить текущую фигуру на следующую
+            figure = deepcopy(next_figure)
+            next_figure = deepcopy(choice(figures))  # Обновляем следующую фигуру
+
             color = choice(palette)
             anim_limit = 2000
-    return figure, color, field, anim_count, anim_limit, status
+    return figure, color, field, anim_count, anim_limit, status, next_figure
 
 
 # Отображение игры
@@ -87,12 +91,22 @@ def draw_game(screen, game_sc, grid, figure, color, field, back_ground, status):
     pygame.display.flip()
 
 
+# Функция для отображения следующей фигуры
+def draw_next_figure(screen, next_figure, palette):
+    next_figure_rect = pygame.Rect((W * TILE) + 50, 50, 30, 30)
+
+    # Отображаем фигуру
+    for block in next_figure:
+        pygame.draw.rect(screen, pygame.Color(palette[0]), block.move(next_figure_rect.topleft))
+
+
 # Главная функция игры
 def main():
     screen, game_sc, clock, grid, field, status = init_game()
     anim_count, anim_speed, anim_limit = 0, 60, 2000
     figure = deepcopy(choice(figures))
     figure = Figure(figure, choice(palette))
+    next_figure = deepcopy(choice(figures))
 
     # Загрузка изображений
     menu_screen, game_over_screen, back_ground, bg = load_images()
@@ -109,9 +123,11 @@ def main():
         if status == "menu":
             screen.blit(menu_screen, (0, 0))  # Показываем меню
         elif status == "to play":
+            draw_next_figure(screen, next_figure, palette)
             figure.figure = update_figure(figure.figure, dx, rotate, field)
-            figure.figure, figure.color, field, anim_count, anim_limit, status = update_animation(figure.figure, field, anim_count, anim_speed, anim_limit, figure)
+            figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure = update_animation(figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)
             draw_game(screen, game_sc, grid, figure.figure, figure.color, field, back_ground, status)  # Отрисовка сетки и фигур
+
         elif status == "game over":
             screen.blit(game_over_screen, (0, 0))
 
