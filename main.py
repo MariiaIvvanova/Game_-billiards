@@ -22,16 +22,16 @@ def init_game():
 
 # Загрузка всех изображений
 def load_images():
-    menu_screen = pygame.image.load('assets/заставка1.png')
+    menu_screen = pygame.image.load('dist/assets/заставка1.png')
     menu_screen = pygame.transform.scale(menu_screen, RES)
 
-    game_over_screen = pygame.image.load('assets/game_over.webp')
+    game_over_screen = pygame.image.load('dist/assets/game_over.webp')
     game_over_screen = pygame.transform.scale(game_over_screen, RES)
 
-    back_ground = pygame.image.load('assets/рабочий_стол_игры.jpeg')
+    back_ground = pygame.image.load('dist/assets/рабочий_стол_игры.jpeg')
     back_ground = pygame.transform.scale(back_ground, RES)
 
-    bg = pygame.image.load("assets/bg.jpeg")
+    bg = pygame.image.load("dist/assets/bg.jpeg")
     bg = pygame.transform.scale(bg, RES)
 
     return menu_screen, game_over_screen, back_ground, bg
