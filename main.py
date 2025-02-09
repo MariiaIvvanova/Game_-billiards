@@ -93,7 +93,7 @@ def draw_game(screen, game_sc, grid, figure, color, field, back_ground, status):
     pygame.display.flip()
 
 
-def draw_next_figure(screen, next_figure, palette, scale=1):
+def draw_next_figure(screen, next_figure, scale=1):
     next_figure_rect = pygame.Rect((W * TILE) + 50, 50, 30 * scale, 30 * scale)
     block_size = TILE * scale
     for i, block in enumerate(next_figure):
@@ -101,7 +101,7 @@ def draw_next_figure(screen, next_figure, palette, scale=1):
         y_offset = (block[1] * block_size)
 
         block_rect = pygame.Rect(next_figure_rect.x + x_offset, next_figure_rect.y + y_offset, block_size, block_size)
-        pygame.draw.rect(screen, pygame.Color("black"), block_rect)
+        pygame.draw.rect(screen, pygame.Color("white"), block_rect)
 
 
 def draw_text(screen, text, x, y, font_size=30):
@@ -110,44 +110,58 @@ def draw_text(screen, text, x, y, font_size=30):
     screen.blit(text_surface, (x, y))
 
 
-# Главная функция игры
-def main():
+def start_settings():
+    pygame.display.set_caption("Тетрис")
+
     screen, game_sc, clock, grid, field, status = init_game()
     anim_count, anim_speed, anim_limit = 0, 60, 2000
-    figure = deepcopy(choice(figures))
-    figure = Figure(figure, choice(palette))
+    figure = Figure(deepcopy(choice(figures)), choice(palette))
     next_figure = deepcopy(choice(figures))
 
-    # Загрузка изображений
-    menu_screen, game_over_screen, back_ground, bg = load_images()
-    running = True
+    return anim_count, anim_speed, anim_limit, figure, screen, next_figure, game_sc, clock, grid, field, status
 
-    while running:
-        running, dx, rotate, drop_speed, status = process_input(status)
-        if status == "try play":
-            anim_count, anim_speed, anim_limit, figure, screen, next_figure, game_sc, clock, grid, field, status = start_settings()
-            status = "to play"
-        if drop_speed:
-            anim_limit = drop_speed
 
-        screen.blit(bg, (0, 0))  # Отрисовка основного фона
+# Главная функция игры
+def main():
+    pygame.init()
 
-        if status == "menu":
-            screen.blit(menu_screen, (0, 0))  # Показываем меню
-        elif status == "to play":
+    while True:  # Вечный цикл для перезапуска игры
+        (anim_count, anim_speed, anim_limit, figure, screen, next_figure,
+         game_sc, clock, grid, field, status) = start_settings()
 
-            figure.figure = update_figure(figure.figure, dx, rotate, field)
-            figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure = update_animation(
-                figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)
-            draw_next_figure(screen, next_figure, palette)
-            # Отрисовка игры
-            draw_game(screen, game_sc, grid, figure.figure, figure.color, field, back_ground, status)  # Отрисовка сетки и фигур
+        menu_screen, game_over_screen, back_ground, bg = load_images()
+        running = True
 
-        elif status == "game over":
-            screen.blit(game_over_screen, (0, 0))
+        while running:
+            running, dx, rotate, drop_speed, status = process_input(status)
+            if not running:
+                pygame.quit()
+                return  # Полностью выйти из игры
 
-        pygame.display.flip()
-        clock.tick(FPS)
+            if status == "try play":
+                break  # Прерываем текущий цикл, чтобы перезапустить игру
+
+            if drop_speed:
+                anim_limit = drop_speed
+
+            screen.blit(bg, (0, 0))
+
+            if status == "menu":
+                screen.blit(menu_screen, (0, 0))
+            elif status == "to play":
+                figure.figure = update_figure(figure.figure, dx, rotate, field)
+                figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure = update_animation(
+                    figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)
+                draw_next_figure(screen, next_figure)
+                draw_game(screen, game_sc, grid, figure.figure, figure.color, field, back_ground, status)
+
+            elif status == "game over":
+                screen.blit(game_over_screen, (0, 0))
+
+            pygame.display.flip()
+            clock.tick(FPS)
+
+        pygame.quit()
 
 
 if __name__ == "__main__":
