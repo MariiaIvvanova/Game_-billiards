@@ -55,9 +55,10 @@ def update_figure(figure, dx, rotate, field):
 
 
 def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object, next_figure):
-    score = 0  # Локальная переменная для счёта
+    score = 0
     status = "to play"
     color = f_object.color
+    next_color = f_object.color
     anim_count += anim_speed
     if anim_count > anim_limit:
         anim_count = 0
@@ -76,6 +77,7 @@ def update_animation(figure, field, anim_count, anim_speed, anim_limit, f_object
             next_figure = deepcopy(choice(figures))  # Обновляем следующую фигуру
 
             color = choice(palette)
+
             anim_limit = 2000
     return figure, color, field, anim_count, anim_limit, status, next_figure
 
@@ -99,7 +101,7 @@ def draw_next_figure(screen, next_figure, palette, scale=1):
         y_offset = (block[1] * block_size)
 
         block_rect = pygame.Rect(next_figure_rect.x + x_offset, next_figure_rect.y + y_offset, block_size, block_size)
-        pygame.draw.rect(screen, pygame.Color(palette[0]), block_rect)
+        pygame.draw.rect(screen, pygame.Color("black"), block_rect)
 
 
 def draw_text(screen, text, x, y, font_size=30):
@@ -122,6 +124,9 @@ def main():
 
     while running:
         running, dx, rotate, drop_speed, status = process_input(status)
+        if status == "try play":
+            anim_count, anim_speed, anim_limit, figure, screen, next_figure, game_sc, clock, grid, field, status = start_settings()
+            status = "to play"
         if drop_speed:
             anim_limit = drop_speed
 
@@ -130,11 +135,11 @@ def main():
         if status == "menu":
             screen.blit(menu_screen, (0, 0))  # Показываем меню
         elif status == "to play":
-            draw_next_figure(screen, next_figure, palette)
+
             figure.figure = update_figure(figure.figure, dx, rotate, field)
             figure.figure, figure.color, field, anim_count, anim_limit, status, next_figure = update_animation(
-                figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)  # Передаём score обратно
-
+                figure.figure, field, anim_count, anim_speed, anim_limit, figure, next_figure)
+            draw_next_figure(screen, next_figure, palette)
             # Отрисовка игры
             draw_game(screen, game_sc, grid, figure.figure, figure.color, field, back_ground, status)  # Отрисовка сетки и фигур
 
